@@ -21,7 +21,7 @@ int main()
 
 	Font font;
 
-	if(!font.loadFromFile("KOMIKAP_.ttf"))
+	if(!font.loadFromFile("font/KOMIKAP_.ttf"))
 	{
 		cerr << "File did not load. \n";
 		return 1;
@@ -33,14 +33,11 @@ int main()
 	instruction.setFillColor(Color::Red);
 	instruction.setPosition(10.f, 10.f);
 
-
-
 	vector<Vector2f> vertices;
 	vector<Vector2f> points;
 
-
 	string message[] = { "Click 3 points to create a triangle", " Click a fourth point to start the Chaos Game", 
-	"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"};
+						"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"};
 
 	while (window.isOpen())
 	{
@@ -96,10 +93,8 @@ int main()
 				Vector2f vertex = vertices[randIndex];
 				Vector2f lastPoint = points.back();
 
-				Vector2f midpoint(
-					(vertex.x + lastPoint.x) / 2,
-					 (vertex.y + lastPoint.y) / 2
-					 );
+				Vector2f midpoint((vertex.x + lastPoint.x) / 2,
+					 			  (vertex.y + lastPoint.y) / 2);
 				points.push_back(midpoint);
 			}
 		}
@@ -110,11 +105,11 @@ int main()
 		****************************************
 		*/
 		if(vertices.size() < 3)
-		instruction.setString(messages[0]);
-		else if(points.emtpy());
-		instruction.setString(messages[1]);
+			instruction.setString(message[0]);
+		else if(points.size() <= 0)
+			instruction.setString(message[1]);
 		else
-		instruction.setString(messages[2]);
+			instruction.setString(message[2]);
 
 		window.clear();
 		window.draw(instruction);
@@ -130,7 +125,7 @@ int main()
 		{
 			CircleShape dot(1);
 			dot.setPosition(p);
-			dot.setFillColor(Color::red);
+			dot.setFillColor(Color::Red);
 			window.draw(dot);
 		}
 		window.display();
