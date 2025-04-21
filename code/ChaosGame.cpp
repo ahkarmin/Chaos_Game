@@ -11,13 +11,36 @@ using namespace std;
 
 int main()
 {
+	
+	srand(static_cast<unsigned int> (time(0)));
+	
 	// Create a video mode object
 	VideoMode vm(1920, 1080);
 	// Create and open a window for the game
 	RenderWindow window(vm, "Chaos Game!!", Style::Default);
+
+	Font font;
+
+	if(!font.loadFromFile("KOMIKAP_.ttf"))
+	{
+		cerr << "File did not load. \n";
+		return 1;
+	}
 	
+	Text instruction;
+	instruction.setFont(font);
+	instruction.setCharacterSize(25);
+	instruction.setFillColor(Color::Red);
+	instruction.setPosition(10.f, 10.f);
+
+
+
 	vector<Vector2f> vertices;
 	vector<Vector2f> points;
+
+
+	string message[] = { "Click 3 points to create a triangle", " Click a fourth point to start the Chaos Game", 
+	"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"};
 
 	while (window.isOpen())
 	{
@@ -49,7 +72,7 @@ int main()
 					else if(points.size() == 0)
 					{
 					///fourth click
-					///push back to points vector
+					
 						points.push_back(Vector2f(event.mouseButton.x, event.mouseButton.y));
 					}
 				}
@@ -67,10 +90,18 @@ int main()
 	
 		if(points.size() > 0)
 		{
-		    ///generate more point(s)
-		    ///select random vertex
-		    ///calculate midpoint between random vertex and the last point in the vector
-		    ///push back the newly generated coord.
+			for(int i = 0; i < 100; i++)
+			{
+				int randIndex = rand() % 3;
+				Vector2f vertex = vertices[randIndex];
+				Vector2f lastPoint = points.back();
+
+				Vector2f midpoint(
+					(vertex.x + lastPoint.x) / 2,
+					 (vertex.y + lastPoint.y) / 2
+					 );
+				points.push_back(midpoint);
+			}
 		}
 	
 		/*
@@ -78,7 +109,15 @@ int main()
 		Draw
 		****************************************
 		*/
+		if(vertices.size() < 3)
+		instruction.setString(messages[0]);
+		else if(points.emtpy());
+		instruction.setString(messages[1]);
+		else
+		instruction.setString(messages[2]);
+
 		window.clear();
+		window.draw(instruction);
 		for(int i = 0; i < vertices.size(); i++)
 		{
 		    RectangleShape rect(Vector2f(10,10));
@@ -87,6 +126,13 @@ int main()
 		    window.draw(rect);
 		}
 		///TODO:  Draw points
+		for(const auto& p : points)
+		{
+			CircleShape dot(1);
+			dot.setPosition(p);
+			dot.setFillColor(Color::red);
+			window.draw(dot);
+		}
 		window.display();
 	}
 }
