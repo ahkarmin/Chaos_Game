@@ -111,6 +111,8 @@ int main()
 						Vertex tempVertex(Vector2f(event.mouseButton.x, event.mouseButton.y), Color(255, 245, 203),
 										  Vector2f(0, 10));
 						verticeLines.push_back(tempVertex);
+						
+						shoot.play();
                         
                         std::cout << "the left button was pressed" << std::endl;
                         std::cout << "mouse x: " << event.mouseButton.x << std::endl;
