@@ -95,7 +95,7 @@ int main()
 		    }
 		    // After a key is Pressed, 
             // Push last vertice to points
-            if (event.type == sf::Event::KeyPressed)
+            if (event.type == sf::Event::KeyPressed && !clickDone)
             {
                 clickDone = true;
                 points.push_back(vertices.back());
@@ -213,6 +213,8 @@ int main()
 /**  @param int &prevIndex - previousIndex to be updated and compared for duplicates
  *   @param int verticeSize
  *   @return int newRandomIndex
+ *   If it's a triangle, this won't care about previousVertex.
+ *   If it's more than 3 points, random vertex won't be the same with previous vertex.
 */ 
 int ChooseRandomVertice(int &prevIndex, int verticeSize)
 {
