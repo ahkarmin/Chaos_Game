@@ -4,10 +4,12 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <ctime>
 
 //Make the code easier to type with "using namespace"
 using namespace sf;
 using namespace std;
+
 
 int main()
 {
@@ -18,10 +20,11 @@ int main()
 	VideoMode vm(1920, 1080);
 	// Create and open a window for the game
 	RenderWindow window(vm, "Chaos Game!!", Style::Default);
-
+    
 	Font font;
+   
 
-	if(!font.loadFromFile("font/KOMIKAP_.ttf"))
+	if (!font.loadFromFile("font/KOMIKAP_.ttf"))
 	{
 		cerr << "File did not load. \n";
 		return 1;
@@ -33,11 +36,43 @@ int main()
 	instruction.setFillColor(Color::Red);
 	instruction.setPosition(10.f, 10.f);
 
+
+
 	vector<Vector2f> vertices;
 	vector<Vector2f> points;
 
-	string message[] = { "Click 3 points to create a triangle", " Click a fourth point to start the Chaos Game", 
-						"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"};
+
+	string messages[] = { 
+	"Click 3 points to create a triangle", 
+	" Click a fourth point to start the Chaos Game", 
+	"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"
+	};
+
+	// load background
+	Texture background;
+	background.loadFromFile("graphics/backgrounds.png");
+	Sprite spritebackground;
+	spritebackground.setTexture(background);
+	spritebackground.setPosition(0,0);
+	
+	
+	//sound effects
+	SoundBuffer shot;
+	shot.loadFromFile("sound/shoot.wav");
+	Sound shoot;
+	shoot.setBuffer(shot);
+
+	// mummy moving
+	Texture mummy;
+	mummy.loadFromFile("graphics/bloater.png");
+	Sprite spritemummy;
+	spritemummy.setTexture(mummy);
+	spritemummy.setPosition(0,800);
+	// is mummy moving
+	bool mummyActive = false;
+	float mummySpeed = 0.0f;
+
+	Clock clock;
 
 	while (window.isOpen())
 	{
@@ -61,7 +96,9 @@ int main()
 					std::cout << "the left button was pressed" << std::endl;
 					std::cout << "mouse x: " << event.mouseButton.x << std::endl;
 					std::cout << "mouse y: " << event.mouseButton.y << std::endl;
+					shoot.play();
 		
+					
 					if(vertices.size() < 3)
 					{
 						vertices.push_back(Vector2f(event.mouseButton.x, event.mouseButton.y));
@@ -84,6 +121,7 @@ int main()
 		Update
 		****************************************
 		*/
+		Time dt = clock.restart();
 	
 		if(points.size() > 0)
 		{
@@ -93,10 +131,35 @@ int main()
 				Vector2f vertex = vertices[randIndex];
 				Vector2f lastPoint = points.back();
 
-				Vector2f midpoint((vertex.x + lastPoint.x) / 2,
-					 			  (vertex.y + lastPoint.y) / 2);
+				Vector2f midpoint(
+					(vertex.x + lastPoint.x) / 2,
+					 (vertex.y + lastPoint.y) / 2
+					 );
 				points.push_back(midpoint);
 			}
+		}
+		if(!mummyActive)
+		{
+			// how fast is moving
+			srand((int)time(0));
+			mummySpeed = (rand() % 20 ) + 200;
+
+			// how high is the mummy
+			srand((int) time(0) * 10);
+			float height = (rand() % 500) + 500;
+			spritemummy.setPosition(2000, height);
+			mummyActive = true;
+		}
+		else
+		{
+			spritemummy.setPosition(spritemummy.getPosition().x - (mummySpeed * dt.asSeconds()), spritemummy.getPosition().y);
+			// has the mummy run out of space
+			if (spritemummy.getPosition().x < - 100)
+			{
+				mummyActive = false;
+			}
+
+
 		}
 	
 		/*
@@ -104,18 +167,22 @@ int main()
 		Draw
 		****************************************
 		*/
+		window.draw(spritebackground);
 		if(vertices.size() < 3)
-			instruction.setString(message[0]);
-		else if(points.size() <= 0)
-			instruction.setString(message[1]);
+		instruction.setString(messages[0]);
+		else if(points.empty())
+		instruction.setString(messages[1]);
 		else
-			instruction.setString(message[2]);
-
+		instruction.setString(messages[2]);
+		
 		window.clear();
+		window.draw(spritebackground);
+		window.draw(spritemummy);
 		window.draw(instruction);
-		for(int i = 0; i < vertices.size(); i++)
+		
+		for(float i = 0; i < vertices.size(); i++)
 		{
-		    RectangleShape rect(Vector2f(10,10));
+		    RectangleShape rect(Vector2f(30,30));
 		    rect.setPosition(Vector2f(vertices[i].x, vertices[i].y));
 		    rect.setFillColor(Color::Blue);
 		    window.draw(rect);
@@ -128,6 +195,7 @@ int main()
 			dot.setFillColor(Color::Red);
 			window.draw(dot);
 		}
+	
 		window.display();
 	}
 }
