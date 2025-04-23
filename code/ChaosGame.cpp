@@ -10,6 +10,7 @@
 using namespace sf;
 using namespace std;
 
+int ChooseRandomVertice(int &prevIndex, int verticeSize);
 
 int main()
 {
@@ -36,16 +37,14 @@ int main()
 	instruction.setFillColor(Color::Red);
 	instruction.setPosition(10.f, 10.f);
 
-
-
 	vector<Vector2f> vertices;
 	vector<Vector2f> points;
+	vector<Vertex> verticeLines;
 
 
-	string messages[] = { 
-	"Click 3 points to create a triangle", 
-	" Click a fourth point to start the Chaos Game", 
-	"Generating Sierpinski Triangle get ready to see some magic! Press Esc to exit the game"
+	string message[] = { 
+	"Click points to create a shape.\nHit \"Enter\" if you're satisfied with the number of points and Chaos Game starts!!",
+	"Generating Sierpinski Shape get ready to see some magic! Press Esc to exit the game"
 	};
 
 	// load background
@@ -74,6 +73,11 @@ int main()
 
 	Clock clock;
 
+	// To prevent duplicate points
+	int prevIndex = 0;
+	// After clickDone = true, starts drawing a picture.
+    bool clickDone = false;
+
 	while (window.isOpen())
 	{
 		/*
@@ -86,28 +90,31 @@ int main()
 		{
 		    if (event.type == Event::Closed)
 		    {
-					// Quit the game when the window is closed
-					window.close();
+				// Quit the game when the window is closed
+				window.close();
 		    }
+		    // After a key is Pressed, 
+            // Push last vertice to points
+            if (event.type == sf::Event::KeyPressed)
+            {
+                clickDone = true;
+                points.push_back(vertices.back());
+                vertices.pop_back();
+            }
 		    if (event.type == sf::Event::MouseButtonPressed)
 		    {
 				if (event.mouseButton.button == sf::Mouse::Left)
 				{
-					std::cout << "the left button was pressed" << std::endl;
-					std::cout << "mouse x: " << event.mouseButton.x << std::endl;
-					std::cout << "mouse y: " << event.mouseButton.y << std::endl;
-					shoot.play();
-		
-					
-					if(vertices.size() < 3)
+					if(!clickDone)
 					{
-						vertices.push_back(Vector2f(event.mouseButton.x, event.mouseButton.y));
-					}
-					else if(points.size() == 0)
-					{
-					///fourth click
-					
-						points.push_back(Vector2f(event.mouseButton.x, event.mouseButton.y));
+                        vertices.push_back(Vector2f(event.mouseButton.x, event.mouseButton.y));
+						Vertex tempVertex(Vector2f(event.mouseButton.x, event.mouseButton.y), Color(255, 245, 203),
+										  Vector2f(0, 10));
+						verticeLines.push_back(tempVertex);
+                        
+                        std::cout << "the left button was pressed" << std::endl;
+                        std::cout << "mouse x: " << event.mouseButton.x << std::endl;
+                        std::cout << "mouse y: " << event.mouseButton.y << std::endl;
 					}
 				}
 		    }
@@ -127,14 +134,14 @@ int main()
 		{
 			for(int i = 0; i < 100; i++)
 			{
-				int randIndex = rand() % 3;
+				int randIndex = ChooseRandomVertice(prevIndex, vertices.size());
 				Vector2f vertex = vertices[randIndex];
 				Vector2f lastPoint = points.back();
 
 				Vector2f midpoint(
-					(vertex.x + lastPoint.x) / 2,
-					 (vertex.y + lastPoint.y) / 2
-					 );
+				(vertex.x + lastPoint.x) / 2,
+				(vertex.y + lastPoint.y) / 2);
+
 				points.push_back(midpoint);
 			}
 		}
@@ -168,12 +175,10 @@ int main()
 		****************************************
 		*/
 		window.draw(spritebackground);
-		if(vertices.size() < 3)
-		instruction.setString(messages[0]);
-		else if(points.empty())
-		instruction.setString(messages[1]);
+		if(!clickDone)
+			instruction.setString(message[0]);
 		else
-		instruction.setString(messages[2]);
+			instruction.setString(message[1]);
 		
 		window.clear();
 		window.draw(spritebackground);
@@ -184,18 +189,36 @@ int main()
 		{
 		    RectangleShape rect(Vector2f(30,30));
 		    rect.setPosition(Vector2f(vertices[i].x, vertices[i].y));
-		    rect.setFillColor(Color::Blue);
+		    rect.setFillColor(Color::Yellow);
 		    window.draw(rect);
 		}
-		///TODO:  Draw points
+
+		window.draw(&verticeLines[0], verticeLines.size(), LineStrip);
+
+		/// Draw points
 		for(const auto& p : points)
 		{
 			CircleShape dot(1);
 			dot.setPosition(p);
-			dot.setFillColor(Color::Red);
+			dot.setFillColor(Color(235, 215, 203));
 			window.draw(dot);
 		}
 	
 		window.display();
 	}
+}
+
+/**  @param int &prevIndex - previousIndex to be updated and compared for duplicates
+ *   @param int verticeSize
+ *   @return int newRandomIndex
+*/ 
+int ChooseRandomVertice(int &prevIndex, int verticeSize)
+{
+    int newRandIndex = rand() % verticeSize;
+    while (newRandIndex == prevIndex && verticeSize != 3)
+    {
+        newRandIndex = rand() % verticeSize;
+    }
+    prevIndex = newRandIndex;
+    return newRandIndex;
 }
